@@ -288,10 +288,16 @@ body {
 .feedback.is-wrong { color: var(--accent-pink-dark); }
 .feedback.is-win { color: #1c7a4a; }
 .feedback.is-error { color: var(--accent-pink-dark); }
+.feedback.is-lose { color: var(--accent-pink-dark); } 
 
 
 .table.is-won .card {
   animation: bump 0.5s ease;
+}
+
+.table.is-lost {
+  border-color: var(--accent-pink);
+  animation: shake 0.4s ease;
 }
 
 @keyframes bump {
@@ -300,6 +306,11 @@ body {
   100% { transform: translate(-50%, -50%) translate(var(--dx,0px), var(--dy,0px)) rotate(var(--rot,0deg)) scale(1); }
 }
 
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25%      { transform: translateX(-8px); }
+  75%      { transform: translateX(8px); }
+}
 
 .modal-backdrop {
   position: fixed;
@@ -337,7 +348,7 @@ body {
 .modal .guess-submit { margin-top: 6px; }
 
 @media (prefers-reduced-motion: reduce) {
-  .card, .guess-submit, .icon-btn, .table.is-won .card {
+  .card, .guess-submit, .icon-btn, .table.is-won .card  .table.is-lost  {
     transition: none;
     animation: none;
   }
