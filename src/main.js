@@ -1,3 +1,4 @@
+import  "./style.css"
 
 const DICEBEAR_STYLES = [
   "bottts",
