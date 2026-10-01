@@ -21,6 +21,8 @@ const WORD_BANK = [
 ];
 
 
+const MAX_WRONG = 3;   // m 
+
 
 const canvasEl = document.getElementById("canvas");
 const emptyStateEl = document.getElementById("emptyState");
@@ -168,18 +170,22 @@ const state = {
   target: "",
   hintLength: 0,
   wrongGuesses: 0,
+  round: 0, // r
 };
+
 
 function pickRandom(list) {
   return list[Math.floor(Math.random() * list.length)];
 }
 
 function newRound() {
+  state.round ++; // i
   state.target = pickRandom(WORD_BANK);
   state.hintLength = 0;
   state.wrongGuesses = 0;
   stack.clear();
   tableEl.classList.remove("is-won");
+  tableEl.classList.remove("is-lost"); // l
   updateHud();
   renderHint();
   setFeedback("", null);
@@ -211,21 +217,43 @@ function setFeedback(message, kind) {
 }
 
 async function handleWrongGuess(guess) {
+  const myRound = state.round;
   state.wrongGuesses += 1;
   state.hintLength = computeHintLength(guess, state.target, state.hintLength);
   updateHud();
   renderHint();
 
+  const lost = state.wrongGuesses > MAX_WRONG;
+  if (lost) guessInput.disabled = true; 
+
   const style = pickRandom(DICEBEAR_STYLES);
   try {
     const svgMarkup = await fetchAvatarSVG(guess, style);
+    if (myRound !== state.round) return; 
     stack.push(svgMarkup);
     updateHud();
-    setFeedback("Not quite — a new card joins the pile.", "wrong");
+    if (!lost) setFeedback("Not quite — a new card joins the pile.", "wrong");
   } catch (err) {
+    if (myRound !== state.round) return;
     console.error(err);
-    setFeedback("Couldn't fetch that card — check your connection and try again.", "error");
+    if (!lost) setFeedback("Couldn't fetch that card — check your connection and try again.", "error");
   }
+
+  if (lost) handleLose();
+}  
+
+function handleWin() {
+  tableEl.classList.add("is-won");
+  setFeedback(`Solved it! "${state.target}" — took ${state.wrongGuesses} wrong guess(es).`, "win");
+  guessInput.disabled = true;
+}                                       
+
+function handleLose() {
+  state.hintLength = state.target.length;
+  renderHint();
+  tableEl.classList.add("is-lost");
+  setFeedback(`Sorry, you lost! The word was "${state.target}".`, "lose");
+  guessInput.disabled = true;
 }
 
 function handleWin() {
@@ -234,7 +262,8 @@ function handleWin() {
   guessInput.disabled = true;
 }
 
-guessForm.addEventListener("submit", (e) => {
+
+guessForm.addEventListener("submit", (e) => {  
   e.preventDefault();
   const raw = guessInput.value.trim().toLowerCase();
   if (!raw) return;
