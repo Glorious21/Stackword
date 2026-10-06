@@ -2,17 +2,16 @@
 
 
 import {WORD_BANK} from "./game/wordsBank";
-
+import Hud from "./components/HUD";
   
 
 function App() {
   
-   
   return (
     
-   <h1>stack the Guess</h1>
+   <Hud />
   )
- 
+
 }
  
 export default App
